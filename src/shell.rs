@@ -1,6 +1,7 @@
 use std::io::stdin;
 use std::io::stdout;
-use  std::io::Write;
+use std::io::Write;
+use std::process::Command;
 
 pub struct Shell;
 
@@ -9,18 +10,34 @@ impl Shell {
         Shell
     }
 
-    pub fn run(&mut self){
-        loop{
+    pub fn run(&mut self) {
+        loop {
             print!("$> ");
             stdout().flush().unwrap();
 
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
-            let input =  input.trim();
-            if  input == "exit" {
+            let input = input.trim();
+
+            if input == "exit" {
                 break;
             }
-            println!("input was {}", input); 
+
+            let mut parts = input.split_whitespace();
+
+            let command = parts.next();
+
+            match command {
+                Some(cmd) => {
+                    let args: Vec<&str> = parts.collect();
+                    
+                    Command::new(cmd).args(args).spawn().unwrap().wait().unwrap();
+
+                }
+                None=>{}
+            }
+
+
         }
-    } 
+    }
 }
