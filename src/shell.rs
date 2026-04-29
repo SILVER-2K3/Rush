@@ -30,14 +30,19 @@ impl Shell {
             match command {
                 Some(cmd) => {
                     let args: Vec<&str> = parts.collect();
-                    
-                    Command::new(cmd).args(args).spawn().unwrap().wait().unwrap();
 
+                    match Command::new(cmd).args(&args).spawn() {
+                        Ok(mut child) => {
+                            child.wait().unwrap();
+                        }
+
+                        Err(_) => {
+                            println!("{}:command not found", cmd);
+                        }
+                    }
                 }
-                None=>{}
+                None => {}
             }
-
-
         }
     }
 }
