@@ -1,7 +1,8 @@
+use crate::executor;
+use crate::parser;
 use std::io::stdin;
 use std::io::stdout;
 use std::io::Write;
-use std::process::Command;
 
 pub struct Shell;
 
@@ -13,7 +14,7 @@ impl Shell {
     pub fn run(&mut self) {
         loop {
             print!("$> ");
-            stdout().flush().unwrap();
+            stdout().flush().unwrap(); //flushing stdout so that promp appears before read_line()
 
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
@@ -23,23 +24,16 @@ impl Shell {
                 break;
             }
 
-            let mut parts = input.split_whitespace();
+            let args = parser::parser(input);
 
-            let command = parts.next();
+            // args.first() returns Option<&String>, map converts it to Option<&str> for executor
+            let command = args.first().map(|s| s.as_str());
 
             match command {
                 Some(cmd) => {
-                    let args: Vec<&str> = parts.collect();
-
-                    match Command::new(cmd).args(&args).spawn() {
-                        Ok(mut child) => {
-                            child.wait().unwrap();
-                        }
-
-                        Err(_) => {
-                            println!("{}:command not found", cmd);
-                        }
-                    }
+                    // skipping index 0 (coz thats the command duh), collecting remaining items as args by iterating through them one by one
+                    let cmd_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
+                    executor::execute(cmd, &cmd_args);
                 }
                 None => {}
             }
