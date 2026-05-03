@@ -1,3 +1,4 @@
+use crate::builtins;
 use crate::executor;
 use crate::parser;
 use std::io::stdin;
@@ -33,7 +34,14 @@ impl Shell {
                 Some(cmd) => {
                     // skipping index 0 (coz thats the command duh), collecting remaining items as args by iterating through them one by one
                     let cmd_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
-                    executor::execute(cmd, &cmd_args);
+
+                    match builtins::run(cmd, &cmd_args) {
+                        builtins::BuiltinResult::Success => {}
+                        builtins::BuiltinResult::Failure(msg) => println!("rush: {}", msg),
+                        builtins::BuiltinResult::NotBuiltin => {
+                            executor::execute(cmd, &cmd_args);
+                        }
+                    }
                 }
                 None => {}
             }

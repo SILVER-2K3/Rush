@@ -1,6 +1,7 @@
 mod shell;
 mod executor;
 mod parser;
+mod builtins;
 
 use shell::Shell;
 
