@@ -2,6 +2,7 @@ mod shell;
 mod executor;
 mod parser;
 mod builtins;
+mod env_manager;
 
 use shell::Shell;
 

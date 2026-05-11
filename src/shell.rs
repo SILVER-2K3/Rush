@@ -1,15 +1,21 @@
 use crate::builtins;
 use crate::executor;
 use crate::parser;
+use crate::env_manager::EnvManager;
+
 use std::io::stdin;
 use std::io::stdout;
 use std::io::Write;
 
-pub struct Shell;
+pub struct Shell {
+    env: EnvManager,
+}
 
 impl Shell {
     pub fn new() -> Self {
-        Shell
+        Shell{
+            env :EnvManager::new(),
+        }
     }
 
     pub fn run(&mut self) {
@@ -35,7 +41,7 @@ impl Shell {
                     // skipping index 0 (coz thats the command duh), collecting remaining items as args by iterating through them one by one
                     let cmd_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
 
-                    match builtins::run(cmd, &cmd_args) {
+                    match builtins::run(cmd, &cmd_args, &self.env) {
                         builtins::BuiltinResult::Success => {}
                         builtins::BuiltinResult::Failure(msg) => println!("rush: {}", msg),
                         builtins::BuiltinResult::NotBuiltin => {
